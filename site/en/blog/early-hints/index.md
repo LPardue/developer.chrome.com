@@ -153,11 +153,11 @@ If you are using one of the following CDNs or platforms, you may not need to man
 - [Early Hints at Cloudflare](https://developers.cloudflare.com/cache/about/early-hints/)
 - [Early Hints at Fastly](https://www.fastly.com/blog/beyond-server-push-experimenting-with-the-103-early-hints-status-code#:~:text=about%20this%20feature.-,Sending%20103%20Early%20Hints,in%20VCL%2C%20like%20this%3A).
 
-## Avoiding issues for clients that do not support Early Hints
+## Considerations for sending Early Hints
 
-Informational HTTP responses in the 100 range are part of the HTTP standard, but some older clients or bots may struggle with these because, prior to the launch of 103 Early Hints, they were rarely used for general web browsing.
+Informational HTTP responses in the 1xx range are part of the HTTP standard, but some older clients or bots do not implement HTTP correctly. This is due to a historical absence of 1xx codes in general web browsing contexts, which would exercise the feature.
 
-Only emitting 103 Early Hints in response to clients that send a `sec-fetch-mode: navigate` HTTP request header has should ensure such hints are only sent for newer clients that understand to wait for the subsequent response. Additionally, since Early Hints are only supported on navigation requests (see [current limitations](#current-limitations)), this has the added benefit of avoiding needlessly sending these on other requests.
+Severs can choose to restrict emitting 103 Early Hints, based on the requests that they receive. This may have the benefit of avoiding needlessly sending hints that will not be acted upon. For example, there is currently a limitation in browsers that restricts acting on received Early Hints to navigation requests (see [current limitations](#current-limitations)). A server could use the prescence of a `sec-fetch-mode: navigate` HTTP request header field to help decide whether or not to emit a 103 Early Hint. The `sec-fetch-mode` field could also be used as a heuristic to distinguish between leagacy and modern clients.
 
 In addition, [Early Hints are recommended to only be sent over HTTP/2 or HTTP/3 connections](https://www.rfc-editor.org/rfc/rfc8297.html#section-3).
 
